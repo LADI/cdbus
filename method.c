@@ -1,8 +1,8 @@
 /* -*- Mode: C ; c-basic-offset: 2 -*- */
 /*
- * LADI Session Handler (ladish)
+ * cdbus - libdbus helper library
  *
- * Copyright (C) 2008,2009,2010,2011 Nedko Arnaudov <nedko@arnaudov.name>
+ * Copyright (C) 2008-2023 Nedko Arnaudov
  * Copyright (C) 2008 Juuso Alasuutari <juuso.alasuutari@gmail.com>
  *
  **************************************************************************
@@ -11,25 +11,27 @@
  *
  * Licensed under the Academic Free License version 2.1
  *
- * LADI Session Handler is free software; you can redistribute it and/or modify
+ * cdbus is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * LADI Session Handler is distributed in the hope that it will be useful,
+ * cdbus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LADI Session Handler. If not, see <http://www.gnu.org/licenses/>
+ * along with cdbus. If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "../common.h"
+#include <stdbool.h>
+#include <stdio.h>
 #include "helpers.h"
 #include "method.h"
+#include "log.h"
 
 void cdbus_error(struct cdbus_method_call * call_ptr, const char * err_name, const char * format, ...)
 {
@@ -48,13 +50,13 @@ void cdbus_error(struct cdbus_method_call * call_ptr, const char * err_name, con
   {
     interface_name = (call_ptr->iface && call_ptr->iface->name && call_ptr->iface->name[0]) ? call_ptr->iface->name : "<unknown>";
 
-    log_error("In method %s.%s: %s", interface_name, call_ptr->method_name, message);
+    cdbus_log_error("In method %s.%s: %s", interface_name, call_ptr->method_name, message);
 
     call_ptr->reply = dbus_message_new_error(call_ptr->message, err_name, message);
   }
   else
   {
-    log_error("%s", message);
+    cdbus_log_error("%s", message);
   }
 }
 
@@ -68,7 +70,7 @@ void cdbus_error(struct cdbus_method_call * call_ptr, const char * err_name, con
 void cdbus_method_return_new_void(struct cdbus_method_call * call_ptr)
 {
   if (!(call_ptr->reply = dbus_message_new_method_return(call_ptr->message))) {
-    log_error("Ran out of memory trying to construct method return");
+    cdbus_log_error("Ran out of memory trying to construct method return");
   }
 }
 
@@ -84,7 +86,7 @@ void cdbus_method_return_new_void(struct cdbus_method_call * call_ptr)
 void cdbus_method_return_new_single(struct cdbus_method_call * call_ptr, int type, const void * arg)
 {
   if (!call_ptr || !arg) {
-    log_error("Invalid arguments");
+    cdbus_log_error("Invalid arguments");
     return;
   }
 
@@ -108,18 +110,18 @@ void cdbus_method_return_new_single(struct cdbus_method_call * call_ptr, int typ
   call_ptr->reply = NULL;
 
 fail_no_mem:
-  log_error("Ran out of memory trying to construct method return");
+  cdbus_log_error("Ran out of memory trying to construct method return");
 }
 
 void cdbus_method_return_new_valist(struct cdbus_method_call * call_ptr, int type, ...)
 {
   if (!call_ptr) {
-    log_error("Call pointer is NULL");
+    cdbus_log_error("Call pointer is NULL");
     return;
   }
 
   if (type == DBUS_TYPE_INVALID) {
-    log_error("No argument(s) supplied");
+    cdbus_log_error("No argument(s) supplied");
     return;
   }
 
@@ -142,7 +144,7 @@ void cdbus_method_return_new_valist(struct cdbus_method_call * call_ptr, int typ
   call_ptr->reply = NULL;
 
 fail_no_mem:
-  log_error("Ran out of memory trying to construct method return");
+  cdbus_log_error("Ran out of memory trying to construct method return");
 }
 
 /*
@@ -156,7 +158,7 @@ void cdbus_method_return_send(struct cdbus_method_call * call_ptr)
   if (call_ptr->reply) {
   retry_send:
     if (!dbus_connection_send(call_ptr->connection, call_ptr->reply, NULL))
-      log_error("Ran out of memory trying to queue "
+      cdbus_log_error("Ran out of memory trying to queue "
                  "method return");
     else
       dbus_connection_flush(call_ptr->connection);
@@ -164,13 +166,13 @@ void cdbus_method_return_send(struct cdbus_method_call * call_ptr)
     dbus_message_unref(call_ptr->reply);
     call_ptr->reply = NULL;
   } else {
-    log_debug("Message was NULL, trying to construct a void return");
+    cdbus_log_debug("Message was NULL, trying to construct a void return");
 
     if ((call_ptr->reply = dbus_message_new_method_return(call_ptr->message))) {
-      log_debug("Constructed a void return, trying to queue it");
+      cdbus_log_debug("Constructed a void return, trying to queue it");
       goto retry_send;
     } else {
-      log_error("Failed to construct method return!");
+      cdbus_log_error("Failed to construct method return!");
     }
   }
 }
@@ -185,7 +187,7 @@ bool cdbus_method_return_verify(DBusMessage * msg, const char ** str)
   if (!dbus_message_get_args(msg, &cdbus_g_dbus_error,
                              DBUS_TYPE_STRING, &ptr,
                              DBUS_TYPE_INVALID)) {
-    log_error("Cannot read description from D-Bus error message: %s ",
+    cdbus_log_error("Cannot read description from D-Bus error message: %s ",
                cdbus_g_dbus_error.message);
     dbus_error_free(&cdbus_g_dbus_error);
     ptr = NULL;

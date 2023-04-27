@@ -1,8 +1,8 @@
 /* -*- Mode: C ; c-basic-offset: 2 -*- */
 /*
- * LADI Session Handler (ladish)
+ * cdbus - libdbus helper library
  *
- * Copyright (C) 2008,2009,2010,2011,2012 Nedko Arnaudov <nedko@arnaudov.name>
+ * Copyright (C) 2008-2023 Nedko Arnaudov
  * Copyright (C) 2008 Juuso Alasuutari <juuso.alasuutari@gmail.com>
  *
  **************************************************************************
@@ -11,24 +11,31 @@
  *
  * Licensed under the Academic Free License version 2.1
  *
- * LADI Session Handler is free software; you can redistribute it and/or modify
+ * cdbus is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * LADI Session Handler is distributed in the hope that it will be useful,
+ * cdbus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LADI Session Handler. If not, see <http://www.gnu.org/licenses/>
+ * along with cdbus. If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "../common.h"
+#include <stdbool.h>
+#include <stdlib.h>             /* malloc() and others */
+#include <string.h>             /* strcmp() */
 #include "helpers.h"
+#include "log.h"
+#include "assert.h"
+
+/* TODO: move to dedicated header */
+#define UNUSED(x) UNUSED_ ## x __attribute__((unused))
 
 struct cdbus_object_path_interface
 {
@@ -57,7 +64,7 @@ DBusMessage * cdbus_introspection_new(struct cdbus_object_path * opath_ptr)
   DBusMessage * msg;
   DBusMessageIter iter;
 
-  log_debug("Creating introspection message");
+  cdbus_log_debug("Creating introspection message");
 
   /*
    * Create introspection XML data.
@@ -133,12 +140,12 @@ DBusMessage * cdbus_introspection_new(struct cdbus_object_path * opath_ptr)
     {
       dbus_message_unref(msg);
       msg = NULL;
-      log_error("Failed to append data to introspection message");
+      cdbus_log_error("Failed to append data to introspection message");
     }
   }
   else
   {
-    log_error("Failed to create introspection message");
+    cdbus_log_error("Failed to create introspection message");
   }
 
   free(xml_data);
@@ -149,7 +156,7 @@ DBusMessage * cdbus_introspection_new(struct cdbus_object_path * opath_ptr)
 
 void cdbus_introspection_destroy(struct cdbus_object_path *path)
 {
-  log_debug("Destroying introspection message");
+  cdbus_log_debug("Destroying introspection message");
 
   if (path && path->introspection) {
     dbus_message_unref(path->introspection);
@@ -157,7 +164,7 @@ void cdbus_introspection_destroy(struct cdbus_object_path *path)
   }
   else
   {
-    log_debug("Nothing to destroy");
+    cdbus_log_debug("Nothing to destroy");
   }
 }
 
@@ -177,19 +184,19 @@ cdbus_introspection_handler(
   call_ptr->reply = dbus_message_copy(call_ptr->iface_context); /* context contains the reply message */
   if (call_ptr->reply == NULL)
   {
-    log_error("Ran out of memory trying to copy introspection message");
+    cdbus_log_error("Ran out of memory trying to copy introspection message");
     goto fail;
   }
 
   if (!dbus_message_set_destination(call_ptr->reply, dbus_message_get_sender(call_ptr->message)))
   {
-    log_error("dbus_message_set_destination() failed.");
+    cdbus_log_error("dbus_message_set_destination() failed.");
     goto unref_reply;
   }
 
   if (!dbus_message_set_reply_serial(call_ptr->reply, dbus_message_get_serial(call_ptr->message)))
   {
-    log_error("dbus_message_set_reply_serial() failed.");
+    cdbus_log_error("dbus_message_set_reply_serial() failed.");
     goto unref_reply;
   }
 
@@ -227,19 +234,19 @@ cdbus_object_path cdbus_object_path_new(const char *name, const struct cdbus_int
   struct cdbus_object_path_interface * iface_dst_ptr;
   size_t len;
 
-  log_debug("Creating object path");
+  cdbus_log_debug("Creating object path");
 
   opath_ptr = malloc(sizeof(struct cdbus_object_path));
   if (opath_ptr == NULL)
   {
-    log_error("malloc() failed to allocate struct cdbus_object_path.");
+    cdbus_log_error("malloc() failed to allocate struct cdbus_object_path.");
     goto fail;
   }
   
   opath_ptr->name = strdup(name);
   if (opath_ptr->name == NULL)
   {
-    log_error("malloc() failed to allocate struct cdbus_object_path.");
+    cdbus_log_error("malloc() failed to allocate struct cdbus_object_path.");
     goto free;
   }
 
@@ -257,7 +264,7 @@ cdbus_object_path cdbus_object_path_new(const char *name, const struct cdbus_int
   opath_ptr->ifaces = malloc((len + 2) * sizeof(struct cdbus_object_path_interface));
   if (opath_ptr->ifaces == NULL)
   {
-    log_error("malloc failed to allocate interfaces array");
+    cdbus_log_error("malloc failed to allocate interfaces array");
     goto free_name;
   }
 
@@ -274,13 +281,13 @@ cdbus_object_path cdbus_object_path_new(const char *name, const struct cdbus_int
   }
   va_end(ap);
 
-  ASSERT(len == 0);
+  CDBUS_ASSERT(len == 0);
 
   iface_dst_ptr->iface = NULL;
   opath_ptr->introspection = cdbus_introspection_new(opath_ptr);
   if (opath_ptr->introspection == NULL)
   {
-    log_error("introspection_new() failed.");
+    cdbus_log_error("introspection_new() failed.");
     goto free_ifaces;
   }
 
@@ -307,21 +314,21 @@ fail:
 
 void cdbus_object_path_unregister(DBusConnection * connection_ptr, cdbus_object_path data)
 {
-  ASSERT(opath_ptr->registered);
+  CDBUS_ASSERT(opath_ptr->registered);
 
   if (!dbus_connection_unregister_object_path(connection_ptr, opath_ptr->name))
   {
-    log_error("dbus_connection_unregister_object_path() failed.");
+    cdbus_log_error("dbus_connection_unregister_object_path() failed.");
   }
 }
 
 void cdbus_object_path_destroy(DBusConnection * connection_ptr, cdbus_object_path data)
 {
-  log_debug("Destroying object path");
+  cdbus_log_debug("Destroying object path");
 
   if (opath_ptr->registered && connection_ptr != NULL && !dbus_connection_unregister_object_path(connection_ptr, opath_ptr->name))
   {
-    log_error("dbus_connection_unregister_object_path() failed.");
+    cdbus_log_error("dbus_connection_unregister_object_path() failed.");
   }
 
   cdbus_introspection_destroy(opath_ptr);
@@ -407,14 +414,14 @@ handled:
 
 static void cdbus_object_path_handler_unregister(DBusConnection * UNUSED(connection_ptr), void * data)
 {
-  log_debug("Message handler of object path %s was unregistered", (opath_ptr && opath_ptr->name) ? opath_ptr->name : "<unknown>");
+  cdbus_log_debug("Message handler of object path %s was unregistered", (opath_ptr && opath_ptr->name) ? opath_ptr->name : "<unknown>");
 }
 
 bool cdbus_object_path_register(DBusConnection * connection_ptr, cdbus_object_path data)
 {
-  log_debug("Registering object path \"%s\"", opath_ptr->name);
+  cdbus_log_debug("Registering object path \"%s\"", opath_ptr->name);
 
-  ASSERT(!opath_ptr->registered);
+  CDBUS_ASSERT(!opath_ptr->registered);
 
   DBusObjectPathVTable vtable =
   {
@@ -425,7 +432,7 @@ bool cdbus_object_path_register(DBusConnection * connection_ptr, cdbus_object_pa
 
   if (!dbus_connection_register_object_path(connection_ptr, opath_ptr->name, &vtable, opath_ptr))
   {
-    log_error("dbus_connection_register_object_path() failed.");
+    cdbus_log_error("dbus_connection_register_object_path() failed.");
     return false;
   }
 

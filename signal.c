@@ -1,8 +1,8 @@
 /* -*- Mode: C ; c-basic-offset: 2 -*- */
 /*
- * LADI Session Handler (ladish)
+ * cdbus - libdbus helper library
  *
- * Copyright (C) 2009,2010,2011 Nedko Arnaudov <nedko@arnaudov.name>
+ * Copyright (C) 2009-2023 Nedko Arnaudov
  * Copyright (C) 2008 Juuso Alasuutari <juuso.alasuutari@gmail.com>
  *
  **************************************************************************
@@ -11,31 +11,33 @@
  *
  * Licensed under the Academic Free License version 2.1
  *
- * LADI Session Handler is free software; you can redistribute it and/or modify
+ * cdbus is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * LADI Session Handler is distributed in the hope that it will be useful,
+ * cdbus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LADI Session Handler. If not, see <http://www.gnu.org/licenses/>
+ * along with cdbus. If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "../common.h"
+#include <stdbool.h>
 #include <stdarg.h>
 #include "helpers.h"
+#include "log.h"
+#include "assert.h"
 
 void cdbus_signal_send(DBusConnection * connection_ptr, DBusMessage * message_ptr)
 {
   if (!dbus_connection_send(connection_ptr, message_ptr, NULL))
   {
-    log_error("Ran out of memory trying to queue signal");
+    cdbus_log_error("Ran out of memory trying to queue signal");
   }
 
   dbus_connection_flush(connection_ptr);
@@ -57,15 +59,15 @@ cdbus_signal_emit(
   DBusMessageIter iter;
   void * parameter_ptr;
 
-  log_debug("Sending signal %s.%s from %s", interface, name, path);
+  cdbus_log_debug("Sending signal %s.%s from %s", interface, name, path);
 
   va_start(ap, signature);
 
-  ASSERT(signature != NULL);
+  CDBUS_ASSERT(signature != NULL);
 
   if (!dbus_signature_validate(signature, NULL))
   {
-    log_error("signature '%s' is invalid", signature);
+    cdbus_log_error("signature '%s' is invalid", signature);
     goto exit;
   }
 
@@ -74,7 +76,7 @@ cdbus_signal_emit(
   message_ptr = dbus_message_new_signal(path, interface, name);
   if (message_ptr == NULL)
   {
-    log_error("dbus_message_new_signal() failed.");
+    cdbus_log_error("dbus_message_new_signal() failed.");
     goto exit;
   }
 
@@ -85,7 +87,7 @@ cdbus_signal_emit(
     type = dbus_signature_iter_get_current_type(&sig_iter);
     if (!dbus_type_is_basic(type))
     {
-      log_error("non-basic input parameter '%c' (%d)", *signature, type);
+      cdbus_log_error("non-basic input parameter '%c' (%d)", *signature, type);
       goto unref;
     }
 
@@ -93,7 +95,7 @@ cdbus_signal_emit(
 
     if (!dbus_message_iter_append_basic(&iter, type, parameter_ptr))
     {
-      log_error("dbus_message_iter_append_basic() failed.");
+      cdbus_log_error("dbus_message_iter_append_basic() failed.");
       goto unref;
     }
 

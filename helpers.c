@@ -1,8 +1,8 @@
 /* -*- Mode: C ; c-basic-offset: 2 -*- */
 /*
- * LADI Session Handler (ladish)
+ * cdbus - libdbus helper library
  *
- * Copyright (C) 2008,2009,2010,2011,2012 Nedko Arnaudov <nedko@arnaudov.name>
+ * Copyright (C) 2008-2023 Nedko Arnaudov
  * Copyright (C) 2008 Juuso Alasuutari <juuso.alasuutari@gmail.com>
  *
  **************************************************************************
@@ -11,18 +11,18 @@
  *
  * Licensed under the Academic Free License version 2.1
  *
- * LADI Session Handler is free software; you can redistribute it and/or modify
+ * cdbus is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * LADI Session Handler is distributed in the hope that it will be useful,
+ * cdbus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LADI Session Handler. If not, see <http://www.gnu.org/licenses/>
+ * along with cdbus. If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
@@ -34,8 +34,11 @@
 
 #include "helpers.h"
 #include "method.h"
-#include "../common.h"
-#include "../common/klist.h"
+#include "klist.h"
+#include "assert.h"
+
+/* TODO: move to dedicated header */
+#define UNUSED(x) UNUSED_ ## x __attribute__((unused))
 
 /* D-Bus versions earlier than 1.4.12 dont define DBUS_TIMEOUT_INFINITE */
 #if !defined(DBUS_TIMEOUT_INFINITE)
@@ -125,7 +128,7 @@ loop:
 
   if (detype != DBUS_TYPE_DICT_ENTRY)
   {
-    log_error("Iterator does not point to a dict entry container");
+    cdbus_log_error("Iterator does not point to a dict entry container");
     return false;
   }
 
@@ -133,7 +136,7 @@ loop:
 
   if (dbus_message_iter_get_arg_type(&entry_iter) != DBUS_TYPE_STRING)
   {
-    log_error("Cannot find key in dict entry container");
+    cdbus_log_error("Cannot find key in dict entry container");
     return false;
   }
 
@@ -146,7 +149,7 @@ loop:
 
   if (!dbus_message_iter_next(&entry_iter) || dbus_message_iter_get_arg_type(&entry_iter) != DBUS_TYPE_VARIANT)
   {
-    log_error("Cannot find variant container in dict entry");
+    cdbus_log_error("Cannot find variant container in dict entry");
     return false;
   }
 
@@ -155,7 +158,7 @@ loop:
   *type = dbus_message_iter_get_arg_type(&variant_iter);
   if (*type == DBUS_TYPE_INVALID)
   {
-    log_error("Cannot find value in variant container");
+    cdbus_log_error("Cannot find value in variant container");
     return false;
   }
 
@@ -163,7 +166,7 @@ loop:
   {
     if (dbus_message_iter_get_element_type(&variant_iter) != DBUS_TYPE_BYTE)
     {
-      log_error("Dict entry value is a non-byte array");
+      cdbus_log_error("Dict entry value is a non-byte array");
       return false;
     }
     *type = '-';
@@ -195,7 +198,7 @@ bool cdbus_iter_get_dict_entry_string(DBusMessageIter * iter_ptr, const char * k
 
   if (type != DBUS_TYPE_STRING)
   {
-    log_error("value of the dict entry '%s' is not a string", key);
+    cdbus_log_error("value of the dict entry '%s' is not a string", key);
     return false;
   }
 
@@ -419,7 +422,7 @@ cdbus_new_method_call_message_valist(
 
   if (!dbus_signature_validate(input_signature, NULL))
   {
-    log_error("input signature '%s' is invalid", input_signature);
+    cdbus_log_error("input signature '%s' is invalid", input_signature);
     goto fail;
   }
 
@@ -428,7 +431,7 @@ cdbus_new_method_call_message_valist(
   msg_ptr = dbus_message_new_method_call(service, object, iface, method);
   if (msg_ptr == NULL)
   {
-    log_error("dbus_message_new_method_call() failed.");
+    cdbus_log_error("dbus_message_new_method_call() failed.");
     goto fail;
   }
 
@@ -439,7 +442,7 @@ cdbus_new_method_call_message_valist(
     type = dbus_signature_iter_get_current_type(&sig_iter);
     if (!dbus_type_is_basic(type))
     {
-      log_error("non-basic input parameter '%c' (%d)", *input_signature, type);
+      cdbus_log_error("non-basic input parameter '%c' (%d)", *input_signature, type);
       goto unref;
     }
 
@@ -447,7 +450,7 @@ cdbus_new_method_call_message_valist(
 
     if (!dbus_message_iter_append_basic(&iter, type, parameter_ptr))
     {
-      log_error("dbus_message_iter_append_basic() failed.");
+      cdbus_log_error("dbus_message_iter_append_basic() failed.");
       goto unref;
     }
 
@@ -500,7 +503,7 @@ cdbus_call(
   bool ret;
   void * parameter_ptr;
 
-  //log_info("dbus_call('%s', '%s', '%s', '%s')", service, object, iface, method);
+  //cdbus_log_info("dbus_call('%s', '%s', '%s', '%s')", service, object, iface, method);
 
   ret = false;
   va_start(ap, input_signature);
@@ -538,20 +541,20 @@ cdbus_call(
 
     if (strcmp(reply_signature, output_signature) != 0)
     {
-      log_error("reply signature is '%s' but expected signature is '%s'", reply_signature, output_signature);
+      cdbus_log_error("reply signature is '%s' but expected signature is '%s'", reply_signature, output_signature);
     }
 
     dbus_message_iter_init(reply_ptr, &iter);
 
     while (*output_signature++ != '\0')
     {
-      ASSERT(dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_INVALID); /* we've checked the signature, this should not happen */
+      CDBUS_ASSERT(dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_INVALID); /* we've checked the signature, this should not happen */
       parameter_ptr = va_arg(ap, void *);
       dbus_message_iter_get_basic(&iter, parameter_ptr);
       dbus_message_iter_next(&iter);
     }
 
-    ASSERT(dbus_message_iter_get_arg_type(&iter) == DBUS_TYPE_INVALID); /* we've checked the signature, this should not happen */
+    CDBUS_ASSERT(dbus_message_iter_get_arg_type(&iter) == DBUS_TYPE_INVALID); /* we've checked the signature, this should not happen */
     dbus_message_unref(reply_ptr);
   }
   else
@@ -583,7 +586,7 @@ static void cdbus_async_call_reply_handler(DBusPendingCall * pending_call_ptr, v
   reply_ptr = dbus_pending_call_steal_reply(pending_call_ptr);
   if (reply_ptr == NULL)
   {
-    log_error("pending call notify called but reply is NULL");
+    cdbus_log_error("pending call notify called but reply is NULL");
   }
   else
   {
@@ -622,20 +625,20 @@ cdbus_call_async(
 
   if (!dbus_connection_send_with_reply(cdbus_g_dbus_connection, request_ptr, &pending_call_ptr, DBUS_TIMEOUT_INFINITE))
   {
-    log_error("dbus_connection_send_with_reply() failed.");
+    cdbus_log_error("dbus_connection_send_with_reply() failed.");
     goto exit;
   }
 
   if (pending_call_ptr == NULL)
   {
-    log_error("dbus_connection_send_with_reply() returned NULL pending call object pointer.");
+    cdbus_log_error("dbus_connection_send_with_reply() returned NULL pending call object pointer.");
     goto exit;
   }
 
   ctx_ptr = malloc(sizeof(struct cdbus_async_call_context) + cookie_size);
   if (ctx_ptr == NULL)
   {
-    log_error("malloc() failed to allocate cdbus_async_call_context struct with cookie size of %zu", cookie_size);
+    cdbus_log_error("malloc() failed to allocate cdbus_async_call_context struct with cookie size of %zu", cookie_size);
     goto unref;
   }
 
@@ -646,7 +649,7 @@ cdbus_call_async(
   ret = dbus_pending_call_set_notify(pending_call_ptr, cdbus_async_call_reply_handler, ctx_ptr, cdbus_async_call_reply_context_free);
   if (!ret)
   {
-    log_error("dbus_pending_call_set_notify() failed.");
+    cdbus_log_error("dbus_pending_call_set_notify() failed.");
     goto free;
   }
 
@@ -697,7 +700,7 @@ cdbus_register_object_signal_handler(
     dbus_bus_add_match(connection, cdbus_compose_signal_match(service, object, iface, *signal), &cdbus_g_dbus_error);
     if (dbus_error_is_set(&cdbus_g_dbus_error))
     {
-      log_error("Failed to add D-Bus match rule: %s", cdbus_g_dbus_error.message);
+      cdbus_log_error("Failed to add D-Bus match rule: %s", cdbus_g_dbus_error.message);
       dbus_error_free(&cdbus_g_dbus_error);
       return false;
     }
@@ -725,7 +728,7 @@ cdbus_unregister_object_signal_handler(
     dbus_bus_remove_match(connection, cdbus_compose_signal_match(service, object, iface, *signal), &cdbus_g_dbus_error);
     if (dbus_error_is_set(&cdbus_g_dbus_error))
     {
-      log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
+      cdbus_log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
       dbus_error_free(&cdbus_g_dbus_error);
       return false;
     }
@@ -795,11 +798,11 @@ cdbus_signal_handler(
   signal_name = dbus_message_get_member(message_ptr);
   if (signal_name == NULL)
   {
-    log_error("Received signal with NULL member");
+    cdbus_log_error("Received signal with NULL member");
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
   }
 
-  log_debug("'%s' sent signal '%s'::'%s'", object_path, interface, signal_name);
+  cdbus_log_debug("'%s' sent signal '%s'::'%s'", object_path, interface, signal_name);
 
   /* Handle session bus signals to track service alive state */
   if (strcmp(interface, DBUS_INTERFACE_DBUS) == 0)
@@ -814,7 +817,7 @@ cdbus_signal_handler(
       return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
 
-    //log_info("NameOwnerChanged signal received");
+    //cdbus_log_info("NameOwnerChanged signal received");
 
     dbus_error_init(&cdbus_g_dbus_error);
     if (!dbus_message_get_args(
@@ -825,7 +828,7 @@ cdbus_signal_handler(
           DBUS_TYPE_STRING, &new_owner,
           DBUS_TYPE_INVALID))
     {
-      log_error("Cannot get message arguments: %s", cdbus_g_dbus_error.message);
+      cdbus_log_error("Cannot get message arguments: %s", cdbus_g_dbus_error.message);
       dbus_error_free(&cdbus_g_dbus_error);
       return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
@@ -900,14 +903,14 @@ static struct cdbus_service_descriptor * find_or_create_service_descriptor(const
   descr_ptr = malloc(sizeof(struct cdbus_service_descriptor));
   if (descr_ptr == NULL)
   {
-    log_error("malloc() failed to allocate struct cdbus_service_descriptor");
+    cdbus_log_error("malloc() failed to allocate struct cdbus_service_descriptor");
     return NULL;
   }
 
   descr_ptr->service_name = strdup(service_name);
   if (descr_ptr->service_name == NULL)
   {
-    log_error("strdup() failed for service name '%s'", service_name);
+    cdbus_log_error("strdup() failed for service name '%s'", service_name);
     free(descr_ptr);
     return NULL;
   }
@@ -956,44 +959,44 @@ cdbus_register_object_signal_hooks(
 
   if (connection != cdbus_g_dbus_connection)
   {
-    log_error("multiple connections are not implemented yet");
-    ASSERT_NO_PASS;
+    cdbus_log_error("multiple connections are not implemented yet");
+    CDBUS_ASSERT_NO_PASS;
     goto fail;
   }
 
   service_ptr = find_or_create_service_descriptor(service_name);
   if (service_ptr == NULL)
   {
-    log_error("find_or_create_service_descriptor() failed.");
+    cdbus_log_error("find_or_create_service_descriptor() failed.");
     goto fail;
   }
 
   hook_ptr = find_signal_hook_descriptor(service_ptr, object, iface);
   if (hook_ptr != NULL)
   {
-    log_error("refusing to register two signal monitors for '%s':'%s':'%s'", service_name, object, iface);
-    ASSERT_NO_PASS;
+    cdbus_log_error("refusing to register two signal monitors for '%s':'%s':'%s'", service_name, object, iface);
+    CDBUS_ASSERT_NO_PASS;
     goto maybe_free_service;
   }
 
   hook_ptr = malloc(sizeof(struct cdbus_signal_hook_descriptor));
   if (hook_ptr == NULL)
   {
-    log_error("malloc() failed to allocate struct cdbus_signal_hook_descriptor");
+    cdbus_log_error("malloc() failed to allocate struct cdbus_signal_hook_descriptor");
     goto maybe_free_service;
   }
 
   hook_ptr->object = strdup(object);
   if (hook_ptr->object == NULL)
   {
-    log_error("strdup() failed for object name");
+    cdbus_log_error("strdup() failed for object name");
     goto free_hook;
   }
 
   hook_ptr->interface = strdup(iface);
   if (hook_ptr->interface == NULL)
   {
-    log_error("strdup() failed for interface name");
+    cdbus_log_error("strdup() failed for interface name");
     goto free_object_name;
   }
 
@@ -1007,18 +1010,18 @@ cdbus_register_object_signal_hooks(
     dbus_bus_add_match(connection, cdbus_compose_signal_match(service_name, object, iface, signal_ptr->signal_name), &cdbus_g_dbus_error);
     if (dbus_error_is_set(&cdbus_g_dbus_error))
     {
-      log_error("Failed to add D-Bus match rule: %s", cdbus_g_dbus_error.message);
+      cdbus_log_error("Failed to add D-Bus match rule: %s", cdbus_g_dbus_error.message);
       dbus_error_free(&cdbus_g_dbus_error);
 
       while (signal_ptr != signal_hooks)
       {
-        ASSERT(signal_ptr > signal_hooks);
+        CDBUS_ASSERT(signal_ptr > signal_hooks);
         signal_ptr--;
 
         dbus_bus_remove_match(connection, cdbus_compose_signal_match(service_name, object, iface, signal_ptr->signal_name), &cdbus_g_dbus_error);
         if (dbus_error_is_set(&cdbus_g_dbus_error))
         {
-          log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
+          cdbus_log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
           dbus_error_free(&cdbus_g_dbus_error);
         }
       }
@@ -1055,24 +1058,24 @@ cdbus_unregister_object_signal_hooks(
 
   if (connection != cdbus_g_dbus_connection)
   {
-    log_error("multiple connections are not implemented yet");
-    ASSERT_NO_PASS;
+    cdbus_log_error("multiple connections are not implemented yet");
+    CDBUS_ASSERT_NO_PASS;
     return;
   }
 
   service_ptr = find_service_descriptor(service_name);
   if (service_ptr == NULL)
   {
-    log_error("find_service_descriptor() failed.");
-    ASSERT_NO_PASS;
+    cdbus_log_error("find_service_descriptor() failed.");
+    CDBUS_ASSERT_NO_PASS;
     return;
   }
 
   hook_ptr = find_signal_hook_descriptor(service_ptr, object, iface);
   if (hook_ptr == NULL)
   {
-    log_error("cannot unregister non-existing signal monitor for '%s':'%s':'%s'", service_name, object, iface);
-    ASSERT_NO_PASS;
+    cdbus_log_error("cannot unregister non-existing signal monitor for '%s':'%s':'%s'", service_name, object, iface);
+    CDBUS_ASSERT_NO_PASS;
     return;
   }
 
@@ -1083,7 +1086,7 @@ cdbus_unregister_object_signal_hooks(
     {
       if (dbus_error_is_set(&cdbus_g_dbus_error))
       {
-        log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
+        cdbus_log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
         dbus_error_free(&cdbus_g_dbus_error);
       }
     }
@@ -1108,22 +1111,22 @@ cdbus_register_service_lifetime_hook(
 
   if (connection != cdbus_g_dbus_connection)
   {
-    log_error("multiple connections are not implemented yet");
-    ASSERT_NO_PASS;
+    cdbus_log_error("multiple connections are not implemented yet");
+    CDBUS_ASSERT_NO_PASS;
     goto fail;
   }
 
   service_ptr = find_or_create_service_descriptor(service_name);
   if (service_ptr == NULL)
   {
-    log_error("find_or_create_service_descriptor() failed.");
+    cdbus_log_error("find_or_create_service_descriptor() failed.");
     goto fail;
   }
 
   if (service_ptr->lifetime_hook_function != NULL)
   {
-    log_error("cannot register two lifetime hooks for '%s'", service_name);
-    ASSERT_NO_PASS;
+    cdbus_log_error("cannot register two lifetime hooks for '%s'", service_name);
+    CDBUS_ASSERT_NO_PASS;
     goto maybe_free_service;
   }
 
@@ -1132,7 +1135,7 @@ cdbus_register_service_lifetime_hook(
   dbus_bus_add_match(connection, cdbus_compose_name_owner_match(service_name), &cdbus_g_dbus_error);
   if (dbus_error_is_set(&cdbus_g_dbus_error))
   {
-    log_error("Failed to add D-Bus match rule: %s", cdbus_g_dbus_error.message);
+    cdbus_log_error("Failed to add D-Bus match rule: %s", cdbus_g_dbus_error.message);
     dbus_error_free(&cdbus_g_dbus_error);
     goto clear_hook;
   }
@@ -1156,22 +1159,22 @@ cdbus_unregister_service_lifetime_hook(
 
   if (connection != cdbus_g_dbus_connection)
   {
-    log_error("multiple connections are not implemented yet");
-    ASSERT_NO_PASS;
+    cdbus_log_error("multiple connections are not implemented yet");
+    CDBUS_ASSERT_NO_PASS;
     return;
   }
 
   service_ptr = find_service_descriptor(service_name);
   if (service_ptr == NULL)
   {
-    log_error("find_service_descriptor() failed.");
+    cdbus_log_error("find_service_descriptor() failed.");
     return;
   }
 
   if (service_ptr->lifetime_hook_function == NULL)
   {
-    log_error("cannot unregister non-existent lifetime hook for '%s'", service_name);
-    ASSERT_NO_PASS;
+    cdbus_log_error("cannot unregister non-existent lifetime hook for '%s'", service_name);
+    CDBUS_ASSERT_NO_PASS;
     return;
   }
 
@@ -1180,7 +1183,7 @@ cdbus_unregister_service_lifetime_hook(
   dbus_bus_remove_match(connection, cdbus_compose_name_owner_match(service_name), &cdbus_g_dbus_error);
   if (dbus_error_is_set(&cdbus_g_dbus_error))
   {
-    log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
+    cdbus_log_error("Failed to remove D-Bus match rule: %s", cdbus_g_dbus_error.message);
     dbus_error_free(&cdbus_g_dbus_error);
   }
 

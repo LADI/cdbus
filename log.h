@@ -1,33 +1,33 @@
 /* -*- Mode: C ; c-basic-offset: 2 -*- */
 /*
- * LADI Session Handler (ladish)
+ * cdbus - libdbus helper library
  *
- * Copyright (C) 2008, 2009, 2012 Nedko Arnaudov <nedko@arnaudov.name>
+ * Copyright (C) 2008-2023 Nedko Arnaudov
  * Copyright (C) 2008 Juuso Alasuutari <juuso.alasuutari@gmail.com>
  * Copyright (C) 2002 Robert Ham <rah@bash.sh>
  *
  **************************************************************************
- * This file contains log macros
+ * This file contains cdbus_log() prototype and related log macros
  **************************************************************************
  *
- * LADI Session Handler is free software; you can redistribute it and/or modify
+ * cdbus is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * LADI Session Handler is distributed in the hope that it will be useful,
+ * cdbus is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LADI Session Handler. If not, see <http://www.gnu.org/licenses/>
+ * along with cdbus. If not, see <http://www.gnu.org/licenses/>
  * or write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __LADISH_LOG_H__
-#define __LADISH_LOG_H__
+#ifndef __CDBUS_LOG_H__
+#define __CDBUS_LOG_H__
 
 #define ANSI_BOLD_ON    "\033[1m"
 #define ANSI_BOLD_OFF   "\033[22m"
@@ -53,7 +53,7 @@
 extern "C"
 #endif
 void
-ladish_log(
+cdbus_log(
   unsigned int level,
   const char * file,
   unsigned int line,
@@ -65,16 +65,16 @@ ladish_log(
 #endif
   ;
 
-#define LADISH_LOG_LEVEL_DEBUG        0
-#define LADISH_LOG_LEVEL_INFO         1
-#define LADISH_LOG_LEVEL_WARN         2
-#define LADISH_LOG_LEVEL_ERROR        3
-#define LADISH_LOG_LEVEL_ERROR_PLAIN  4
+#define CDBUS_LOG_LEVEL_DEBUG        0
+#define CDBUS_LOG_LEVEL_INFO         1
+#define CDBUS_LOG_LEVEL_WARN         2
+#define CDBUS_LOG_LEVEL_ERROR        3
+#define CDBUS_LOG_LEVEL_ERROR_PLAIN  4
 
-#define log_debug(fmt, args...)       ladish_log(LADISH_LOG_LEVEL_DEBUG,       __FILE__, __LINE__, __func__, fmt, ## args)
-#define log_info(fmt, args...)        ladish_log(LADISH_LOG_LEVEL_INFO,        __FILE__, __LINE__, __func__, fmt, ## args)
-#define log_warn(fmt, args...)        ladish_log(LADISH_LOG_LEVEL_WARN,        __FILE__, __LINE__, __func__, fmt, ## args)
-#define log_error(fmt, args...)       ladish_log(LADISH_LOG_LEVEL_ERROR,       __FILE__, __LINE__, __func__, fmt, ## args)
-#define log_error_plain(fmt, args...) ladish_log(LADISH_LOG_LEVEL_ERROR_PLAIN, __FILE__, __LINE__, __func__, fmt, ## args)
+#define cdbus_log_debug(fmt, args...)       cdbus_log(CDBUS_LOG_LEVEL_DEBUG,       __FILE__, __LINE__, __func__, fmt, ## args)
+#define cdbus_log_info(fmt, args...)        cdbus_log(CDBUS_LOG_LEVEL_INFO,        __FILE__, __LINE__, __func__, fmt, ## args)
+#define cdbus_log_warn(fmt, args...)        cdbus_log(CDBUS_LOG_LEVEL_WARN,        __FILE__, __LINE__, __func__, fmt, ## args)
+#define cdbus_log_error(fmt, args...)       cdbus_log(CDBUS_LOG_LEVEL_ERROR,       __FILE__, __LINE__, __func__, fmt, ## args)
+#define cdbus_log_error_plain(fmt, args...) cdbus_log(CDBUS_LOG_LEVEL_ERROR_PLAIN, __FILE__, __LINE__, __func__, fmt, ## args)
 
-#endif /* __LADISH_LOG__ */
+#endif /* __CDBUS_LOG__ */
