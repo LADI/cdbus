@@ -66,7 +66,7 @@ void cdbus_method_return_send(struct cdbus_method_call * call_ptr);
 void cdbus_method_default_handler(DBusPendingCall * pending, void * data);
 
 #define CDBUS_METHOD_ARGS_BEGIN(method_name, descr) \
-static const struct cdbus_method_arg_descriptor method_name ## _args_dtor[] = \
+static const struct cdbus_method_arg_descriptor cdbus_ ## method_name ## _args_dtor[] = \
 {
 
 #define CDBUS_METHOD_ARG_DESCRIBE_IN(arg_name, arg_type, descr) \
@@ -90,14 +90,14 @@ static const struct cdbus_method_arg_descriptor method_name ## _args_dtor[] = \
 };
 
 #define CDBUS_METHODS_BEGIN                                     \
-static const struct cdbus_method_descriptor methods_dtor[] =    \
+static const struct cdbus_method_descriptor cdbus_methods_dtor[] =    \
 {
 
 #define CDBUS_METHOD_DESCRIBE(method_name, handler_name)        \
         {                                                       \
                 .name = # method_name,                          \
                 .handler = handler_name,                        \
-                .args = method_name ## _args_dtor               \
+                .args = cdbus_ ## method_name ## _args_dtor     \
         },
 
 #define CDBUS_METHODS_END                                       \

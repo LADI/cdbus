@@ -54,10 +54,10 @@ const struct cdbus_interface_descriptor iface_var =  \
   .handler = handler_func,
 
 #define CDBUS_INTERFACE_EXPOSE_METHODS          \
-  .methods = methods_dtor,
+  .methods = cdbus_methods_dtor,
 
 #define CDBUS_INTERFACE_EXPOSE_SIGNALS          \
-  .signals = signals_dtor,
+  .signals = cdbus_signals_dtor,
 
 #define CDBUS_INTERFACE_END                     \
 };

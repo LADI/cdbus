@@ -49,8 +49,8 @@
 
 DBusConnection * cdbus_g_dbus_connection;
 DBusError cdbus_g_dbus_error;
-static char * g_dbus_call_last_error_name;
-static char * g_dbus_call_last_error_message;
+static char * cdbus_g_dbus_call_last_error_name;
+static char * cdbus_g_dbus_call_last_error_message;
 
 struct cdbus_signal_hook_descriptor
 {
@@ -69,26 +69,26 @@ struct cdbus_service_descriptor
   struct list_head hooks;
 };
 
-static LIST_HEAD(g_dbus_services);
+static LIST_HEAD(cdbus_g_dbus_services);
 
 
 void cdbus_call_last_error_cleanup(void)
 {
-  free(g_dbus_call_last_error_name);
-  g_dbus_call_last_error_name = NULL;
+  free(cdbus_g_dbus_call_last_error_name);
+  cdbus_g_dbus_call_last_error_name = NULL;
 
-  free(g_dbus_call_last_error_message);
-  g_dbus_call_last_error_message = NULL;
+  free(cdbus_g_dbus_call_last_error_message);
+  cdbus_g_dbus_call_last_error_message = NULL;
 }
 
 bool cdbus_call_last_error_is_name(const char * name)
 {
-  return g_dbus_call_last_error_name != NULL && strcmp(name, g_dbus_call_last_error_name) == 0;
+  return cdbus_g_dbus_call_last_error_name != NULL && strcmp(name, cdbus_g_dbus_call_last_error_name) == 0;
 }
 
 const char * cdbus_call_last_error_get_message(void)
 {
-  return g_dbus_call_last_error_message != NULL ? g_dbus_call_last_error_message : "";
+  return cdbus_g_dbus_call_last_error_message != NULL ? cdbus_g_dbus_call_last_error_message : "";
 }
 
 static void cdbus_call_last_error_set(void)
@@ -97,12 +97,12 @@ static void cdbus_call_last_error_set(void)
 
   if (cdbus_g_dbus_error.name != NULL)
   {
-    g_dbus_call_last_error_name = strdup(cdbus_g_dbus_error.name);
+    cdbus_g_dbus_call_last_error_name = strdup(cdbus_g_dbus_error.name);
   }
 
   if (cdbus_g_dbus_error.message != NULL)
   {
-    g_dbus_call_last_error_message = strdup(cdbus_g_dbus_error.message);
+    cdbus_g_dbus_call_last_error_message = strdup(cdbus_g_dbus_error.message);
   }
 }
 
@@ -878,7 +878,7 @@ static struct cdbus_service_descriptor * find_service_descriptor(const char * se
   struct list_head * node_ptr;
   struct cdbus_service_descriptor * descr_ptr;
 
-  list_for_each(node_ptr, &g_dbus_services)
+  list_for_each(node_ptr, &cdbus_g_dbus_services)
   {
     descr_ptr = list_entry(node_ptr, struct cdbus_service_descriptor, siblings);
     if (strcmp(descr_ptr->service_name, service_name) == 0)
@@ -890,7 +890,9 @@ static struct cdbus_service_descriptor * find_service_descriptor(const char * se
   return NULL;
 }
 
-static struct cdbus_service_descriptor * find_or_create_service_descriptor(const char * service_name)
+static struct cdbus_service_descriptor *
+cdbus_find_or_create_service_descriptor(
+  const char * service_name)
 {
   struct cdbus_service_descriptor * descr_ptr;
 
@@ -918,14 +920,17 @@ static struct cdbus_service_descriptor * find_or_create_service_descriptor(const
   descr_ptr->lifetime_hook_function = NULL;
   INIT_LIST_HEAD(&descr_ptr->hooks);
 
-  list_add_tail(&descr_ptr->siblings, &g_dbus_services);
+  list_add_tail(&descr_ptr->siblings, &cdbus_g_dbus_services);
 
   dbus_connection_add_filter(cdbus_g_dbus_connection, cdbus_signal_handler, descr_ptr, NULL);
 
   return descr_ptr;
 }
 
-static void free_service_descriptor_if_empty(struct cdbus_service_descriptor * service_ptr)
+static
+void
+cdbus_free_service_descriptor_if_empty(
+  struct cdbus_service_descriptor * service_ptr)
 {
   if (service_ptr->lifetime_hook_function != NULL)
   {
@@ -964,10 +969,10 @@ cdbus_register_object_signal_hooks(
     goto fail;
   }
 
-  service_ptr = find_or_create_service_descriptor(service_name);
+  service_ptr = cdbus_find_or_create_service_descriptor(service_name);
   if (service_ptr == NULL)
   {
-    cdbus_log_error("find_or_create_service_descriptor() failed.");
+    cdbus_log_error("cdbus_find_or_create_service_descriptor() failed.");
     goto fail;
   }
 
@@ -1040,7 +1045,7 @@ free_object_name:
 free_hook:
   free(hook_ptr);
 maybe_free_service:
-  free_service_descriptor_if_empty(service_ptr);
+  cdbus_free_service_descriptor_if_empty(service_ptr);
 fail:
   return false;
 }
@@ -1098,7 +1103,7 @@ cdbus_unregister_object_signal_hooks(
   free(hook_ptr->object);
   free(hook_ptr);
 
-  free_service_descriptor_if_empty(service_ptr);
+  cdbus_free_service_descriptor_if_empty(service_ptr);
 }
 
 bool
@@ -1116,10 +1121,10 @@ cdbus_register_service_lifetime_hook(
     goto fail;
   }
 
-  service_ptr = find_or_create_service_descriptor(service_name);
+  service_ptr = cdbus_find_or_create_service_descriptor(service_name);
   if (service_ptr == NULL)
   {
-    cdbus_log_error("find_or_create_service_descriptor() failed.");
+    cdbus_log_error("cdbus_find_or_create_service_descriptor() failed.");
     goto fail;
   }
 
@@ -1145,7 +1150,7 @@ cdbus_register_service_lifetime_hook(
 clear_hook:
   service_ptr->lifetime_hook_function = NULL;
 maybe_free_service:
-  free_service_descriptor_if_empty(service_ptr);
+  cdbus_free_service_descriptor_if_empty(service_ptr);
 fail:
   return false;
 }
@@ -1187,5 +1192,5 @@ cdbus_unregister_service_lifetime_hook(
     dbus_error_free(&cdbus_g_dbus_error);
   }
 
-  free_service_descriptor_if_empty(service_ptr);
+  cdbus_free_service_descriptor_if_empty(service_ptr);
 }

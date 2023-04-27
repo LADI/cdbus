@@ -221,7 +221,7 @@ CDBUS_METHODS_BEGIN
   CDBUS_METHOD_DESCRIBE(Introspect, NULL)
 CDBUS_METHODS_END
 
-CDBUS_INTERFACE_BEGIN(g_dbus_interface_dtor_introspectable, "org.freedesktop.DBus.Introspectable")
+CDBUS_INTERFACE_BEGIN(cdbus_g_dbus_interface_dtor_introspectable, "org.freedesktop.DBus.Introspectable")
   CDBUS_INTERFACE_HANDLER(cdbus_introspection_handler)
   CDBUS_INTERFACE_EXPOSE_METHODS
 CDBUS_INTERFACE_END
@@ -291,7 +291,7 @@ cdbus_object_path cdbus_object_path_new(const char *name, const struct cdbus_int
     goto free_ifaces;
   }
 
-  iface_dst_ptr->iface = &g_dbus_interface_dtor_introspectable;
+  iface_dst_ptr->iface = &cdbus_g_dbus_interface_dtor_introspectable;
   iface_dst_ptr->iface_context = opath_ptr->introspection;
   iface_dst_ptr++;
   iface_dst_ptr->iface = NULL;
