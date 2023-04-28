@@ -202,20 +202,23 @@ def build(bld):
         'cdbus.h',
     ])
 
-    # process lash-1.0.pc.in -> lash-1.0.pc
-    # bld(
-    #     features     = 'subst', # the feature 'subst' overrides the source/target processing
-    #     source       = os.path.join("lash_compat", 'lash-1.0.pc.in'), # list of string or nodes
-    #     target       = 'lash-1.0.pc', # list of strings or nodes
-    #     install_path = '${LIBDIR}/pkgconfig/',
-    #     # variables to use in the substitution
-    #     prefix       = bld.env['PREFIX'],
-    #     exec_prefix  = bld.env['PREFIX'],
-    #     libdir       = bld.env['LIBDIR'],
-    #     includedir   = os.path.normpath(bld.env['PREFIX'] + '/include'))
+    # process cdbus-1.pc.in -> cdbus-1.pc
+    bld(
+        features     = 'subst', # the feature 'subst' overrides the source/target processing
+        source       = 'cdbus-1.pc.in', # list of string or nodes
+        target       = 'cdbus-1.pc', # list of strings or nodes
+        install_path = '${LIBDIR}/pkgconfig/',
+        # variables to use in the substitution
+        prefix       = bld.env['PREFIX'],
+        libdir       = bld.env['LIBDIR'],
+        includedir   = os.path.normpath(bld.env['PREFIX'] + '/include'))
 
-    # bld.install_files('${DOCDIR}', ["AUTHORS", "README.adoc", "NEWS"])
-    # bld.install_as('${DATA_DIR}/COPYING', "gpl2.txt")
+    bld.install_files('${DOCDIR}', [
+        "NEWS.adoc",
+        "README.adoc",
+        "gpl2.txt",
+        "AUTHORS",
+    ])
 
     # if bld.env['BUILD_DOXYGEN_DOCS'] == True:
     #     html_docs_source_dir = "build/default/html"

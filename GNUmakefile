@@ -20,3 +20,8 @@ default:
 .PHONY: README.html
 README.html:
 	asciidoc -b html5 -a data-uri -a icons --theme ladi -o README.html README.adoc
+
+.PHONY: AUTHORS.regenerate
+AUTHORS.regenerate:
+	git shortlog -sn -- wscript . | sed -E 's@^\s+\S+\s+(.+)@\1@' > AUTHORS
+	cat AUTHORS.tail >> AUTHORS
