@@ -106,6 +106,8 @@ def configure(conf):
         add_cflag(conf, '-g')
         add_cflag(conf, '-O0')
         add_linkflag(conf, '-g')
+    else:
+        add_cflag(conf, '-O1')
 
     conf.env['DATA_DIR'] = os.path.normpath(os.path.join(conf.env['PREFIX'], 'share', APPNAME))
     conf.env['LOCALE_DIR'] = os.path.normpath(os.path.join(conf.env['PREFIX'], 'share', 'locale'))
