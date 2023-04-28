@@ -1,4 +1,6 @@
-Files in this tree are dual-licensed under the GPL and AFL 2.1.
+Most of the files in this tree are dual-licensed under the GPL and AFL 2.1.
+
+klist.h is a borrow from linux kernel and is GPL2
 
 Please see gpl2.txt and afl21.txt for more information on these two
 licenses.
