@@ -194,7 +194,13 @@ def build(bld):
         'helpers.c',
     ]
 
-    #bld.install_files('${PREFIX}/include/lash-1.0/lash', bld.path.ant_glob('lash_compat/libcdbus/lash/*.h'))
+    bld.install_files('${PREFIX}/include/cdbus-1/cdbus', [
+        'signal.h',
+        'method.h',
+        'object_path.h',
+        'interface.h',
+        'cdbus.h',
+    ])
 
     # process lash-1.0.pc.in -> lash-1.0.pc
     # bld(
