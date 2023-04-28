@@ -27,12 +27,11 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdbool.h>
-#include <dbus/dbus.h>
+#include "cdbus.h"
+
 #include <string.h>
 #include <stdlib.h>
 
-#include "helpers.h"
 #include "method.h"
 #include "klist.h"
 #include "assert.h"

@@ -30,6 +30,7 @@
 #ifndef CDBUS_HELPERS_H__6C2107A6_A5E3_4806_869B_4BE609535BA2__INCLUDED
 #define CDBUS_HELPERS_H__6C2107A6_A5E3_4806_869B_4BE609535BA2__INCLUDED
 
+#include <stdbool.h>
 #include <dbus/dbus.h>
 
 extern DBusConnection * cdbus_g_dbus_connection;
