@@ -91,7 +91,7 @@ def configure(conf):
 
     add_cflag(conf, '-fvisibility=hidden')
 
-    conf.env['BUILD_WERROR'] = True
+    conf.env['BUILD_WERROR'] = Options.options.debug
     add_cflag(conf, '-Wall')
     add_cflag(conf, '-Wextra')
     #conf.env.append_unique('CXXFLAGS', '-Wno-unused-parameter') # the UNUSED() macro doesnt work for C++
