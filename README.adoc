@@ -10,8 +10,8 @@ This library complements the API provided by https://www.freedesktop.org/wiki/So
 so to ease libdbus interfacing in plain C code.
 
 Before becoming a separate software module,
-the code in this library was part of https://ladish.org/jackdbus.html[jackdbus].
-lash and https://ladish.org/[ladish].
+the code in this library was part of https://ladish.org/jackdbus.html[jackdbus],
+a2jmidid, lash and https://ladish.org/[ladish].
 
 == Source code
 https://github.com/LADI/cdbus.git[LADI/cdbus at github.com]
