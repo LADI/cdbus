@@ -1,0 +1,17 @@
+== cdbus - libdbus helper library (in plain C)
+
+.WORK IN PROGRESS
+[NOTE]
+This is Work In Progress of refactoring cdbus code that is currently
+part of https://ladish.org/jackdbus.html[jackdbus], a2jmidid, lash and
+https://ladish.org/[ladish] as a reusable software component.
+
+This library complements the API provided by https://www.freedesktop.org/wiki/Software/dbus/[libdbus]
+so to ease libdbus interfacing in plain C code.
+
+Before becoming a separate software module,
+the code in this library was part of https://ladish.org/jackdbus.html[jackdbus].
+lash and https://ladish.org/[ladish].
+
+== Source code
+https://github.com/LADI/cdbus.git[LADI/cdbus at github.com]
