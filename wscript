@@ -184,7 +184,6 @@ def build(bld):
     libcdbus.target = 'cdbus'
     libcdbus.vnum = "1.0.0"
     libcdbus.defines = ['LOG_OUTPUT_STDOUT']
-    libcdbus.source = [os.path.join("lash_compat", "libcdbus", 'lash.c')]
 
     libcdbus.source = [
         'signal.c',
