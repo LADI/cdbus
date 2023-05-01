@@ -29,15 +29,7 @@
 #ifndef __CDBUS_LOG_H__
 #define __CDBUS_LOG_H__
 
-#define ANSI_BOLD_ON    "\033[1m"
-#define ANSI_BOLD_OFF   "\033[22m"
-#define ANSI_COLOR_RED  "\033[31m"
-#define ANSI_COLOR_YELLOW "\033[33m"
-#define ANSI_RESET      "\033[0m"
-
 #include <stdio.h>
-
-#include "config.h"
 
 /* fallback for old gcc versions,
    http://gcc.gnu.org/onlinedocs/gcc/Function-Names.html */
@@ -52,8 +44,9 @@
 #ifdef __cplusplus
 extern "C"
 #endif
+typedef
 void
-cdbus_log(
+(* cdbus_log_function)(
   unsigned int level,
   const char * file,
   unsigned int line,
@@ -71,10 +64,14 @@ cdbus_log(
 #define CDBUS_LOG_LEVEL_ERROR        3
 #define CDBUS_LOG_LEVEL_ERROR_PLAIN  4
 
+extern cdbus_log_function cdbus_log;
+
 #define cdbus_log_debug(fmt, args...)       cdbus_log(CDBUS_LOG_LEVEL_DEBUG,       __FILE__, __LINE__, __func__, fmt, ## args)
 #define cdbus_log_info(fmt, args...)        cdbus_log(CDBUS_LOG_LEVEL_INFO,        __FILE__, __LINE__, __func__, fmt, ## args)
 #define cdbus_log_warn(fmt, args...)        cdbus_log(CDBUS_LOG_LEVEL_WARN,        __FILE__, __LINE__, __func__, fmt, ## args)
 #define cdbus_log_error(fmt, args...)       cdbus_log(CDBUS_LOG_LEVEL_ERROR,       __FILE__, __LINE__, __func__, fmt, ## args)
 #define cdbus_log_error_plain(fmt, args...) cdbus_log(CDBUS_LOG_LEVEL_ERROR_PLAIN, __FILE__, __LINE__, __func__, fmt, ## args)
+
+void cdbus_log_setup(cdbus_log_function logfn);
 
 #endif /* __CDBUS_LOG__ */

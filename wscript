@@ -191,6 +191,7 @@ def build(bld):
         'object_path.c',
         'interface.c',
         'helpers.c',
+        'log.c',
     ]
 
     bld.install_files('${PREFIX}/include/cdbus-1/cdbus', [
@@ -200,6 +201,7 @@ def build(bld):
         'object_path.h',
         'interface.h',
         'cdbus.h',
+        'log.h',
     ])
 
     # process cdbus-1.pc.in -> cdbus-1.pc
