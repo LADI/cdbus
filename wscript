@@ -194,6 +194,7 @@ def build(bld):
     ]
 
     bld.install_files('${PREFIX}/include/cdbus-1/cdbus', [
+        'version.h',
         'signal.h',
         'method.h',
         'object_path.h',
