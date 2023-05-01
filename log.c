@@ -30,6 +30,7 @@
 
 cdbus_log_function cdbus_log;
 
+__attribute__((visibility("default")))
 void cdbus_log_setup(cdbus_log_function logfn)
 {
   cdbus_log = logfn;
