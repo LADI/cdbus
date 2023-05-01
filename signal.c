@@ -33,6 +33,7 @@
 #include "log.h"
 #include "assert.h"
 
+__attribute__((visibility("default")))
 void cdbus_signal_send(DBusConnection * connection_ptr, DBusMessage * message_ptr)
 {
   if (!dbus_connection_send(connection_ptr, message_ptr, NULL))
@@ -43,6 +44,7 @@ void cdbus_signal_send(DBusConnection * connection_ptr, DBusMessage * message_pt
   dbus_connection_flush(connection_ptr);
 }
 
+__attribute__((visibility("default")))
 void
 cdbus_signal_emit(
   DBusConnection * connection_ptr,

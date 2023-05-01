@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include "log.h"
 
+__attribute__((visibility("default")))
 void cdbus_error(struct cdbus_method_call * call_ptr, const char * err_name, const char * format, ...)
 {
   va_list ap;
@@ -66,6 +67,7 @@ void cdbus_error(struct cdbus_method_call * call_ptr, const char * err_name, con
  * there's no sense in trying to construct an error return. Instead,
  * call_ptr->reply will be set to NULL and handled in send_method_return().
  */
+__attribute__((visibility("default")))
 void cdbus_method_return_new_void(struct cdbus_method_call * call_ptr)
 {
   if (!(call_ptr->reply = dbus_message_new_method_return(call_ptr->message))) {
@@ -82,6 +84,7 @@ void cdbus_method_return_new_void(struct cdbus_method_call * call_ptr)
  * there's no sense in trying to construct an error return. Instead,
  * call_ptr->reply will be set to NULL and handled in send_method_return().
  */
+__attribute__((visibility("default")))
 void cdbus_method_return_new_single(struct cdbus_method_call * call_ptr, int type, const void * arg)
 {
   if (!call_ptr || !arg) {
@@ -112,6 +115,7 @@ fail_no_mem:
   cdbus_log_error("Ran out of memory trying to construct method return");
 }
 
+__attribute__((visibility("default")))
 void cdbus_method_return_new_valist(struct cdbus_method_call * call_ptr, int type, ...)
 {
   if (!call_ptr) {
@@ -152,6 +156,7 @@ fail_no_mem:
  * If call_ptr->reply is NULL, i.e. a previous attempt to construct
  * a return has failed, attempt to send a void return.
  */
+__attribute__((visibility("default")))
 void cdbus_method_return_send(struct cdbus_method_call * call_ptr)
 {
   if (call_ptr->reply) {
@@ -176,6 +181,7 @@ void cdbus_method_return_send(struct cdbus_method_call * call_ptr)
   }
 }
 
+__attribute__((visibility("default")))
 bool cdbus_method_return_verify(DBusMessage * msg, const char ** str)
 {
   if (!msg || dbus_message_get_type(msg) != DBUS_MESSAGE_TYPE_ERROR)

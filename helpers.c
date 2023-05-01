@@ -46,8 +46,12 @@
 
 #define DBUS_CALL_DEFAULT_TIMEOUT 3000 // in milliseconds
 
+ __attribute__((visibility("default")))
 DBusConnection * cdbus_g_dbus_connection;
+
+ __attribute__((visibility("default")))
 DBusError cdbus_g_dbus_error;
+
 static char * cdbus_g_dbus_call_last_error_name;
 static char * cdbus_g_dbus_call_last_error_message;
 
@@ -71,6 +75,7 @@ struct cdbus_service_descriptor
 static LIST_HEAD(cdbus_g_dbus_services);
 
 
+__attribute__((visibility("default")))
 void cdbus_call_last_error_cleanup(void)
 {
   free(cdbus_g_dbus_call_last_error_name);
@@ -80,11 +85,13 @@ void cdbus_call_last_error_cleanup(void)
   cdbus_g_dbus_call_last_error_message = NULL;
 }
 
+__attribute__((visibility("default")))
 bool cdbus_call_last_error_is_name(const char * name)
 {
   return cdbus_g_dbus_call_last_error_name != NULL && strcmp(name, cdbus_g_dbus_call_last_error_name) == 0;
 }
 
+__attribute__((visibility("default")))
 const char * cdbus_call_last_error_get_message(void)
 {
   return cdbus_g_dbus_call_last_error_message != NULL ? cdbus_g_dbus_call_last_error_message : "";
@@ -105,6 +112,7 @@ static void cdbus_call_last_error_set(void)
   }
 }
 
+__attribute__((visibility("default")))
 bool cdbus_iter_get_dict_entry(DBusMessageIter * iter_ptr, const char * key, void * value, int * type, int * size)
 {
   DBusMessageIter dict_iter;
@@ -186,6 +194,7 @@ loop:
   return true;
 }
 
+__attribute__((visibility("default")))
 bool cdbus_iter_get_dict_entry_string(DBusMessageIter * iter_ptr, const char * key, const char ** value)
 {
   int type;
@@ -208,6 +217,7 @@ bool cdbus_iter_get_dict_entry_string(DBusMessageIter * iter_ptr, const char * k
  * Append a variant type to a D-Bus message.
  * Return false if something fails, true otherwise.
  */
+__attribute__((visibility("default")))
 bool cdbus_iter_append_variant(DBusMessageIter * iter, int type, const void * arg)
 {
   DBusMessageIter sub_iter;
@@ -267,6 +277,7 @@ fail:
   return false;
 }
 
+__attribute__((visibility("default")))
 bool cdbus_iter_append_dict_entry(DBusMessageIter * iter, int type, const char * key, const void * value, int length)
 {
   DBusMessageIter dict_iter;
@@ -297,6 +308,7 @@ fail:
   return false;
 }
 
+__attribute__((visibility("default")))
 bool cdbus_maybe_add_dict_entry_string(DBusMessageIter *dict_iter_ptr, const char * key, const char * value)
 {
   DBusMessageIter dict_entry_iter;
@@ -327,6 +339,7 @@ bool cdbus_maybe_add_dict_entry_string(DBusMessageIter *dict_iter_ptr, const cha
   return true;
 }
 
+__attribute__((visibility("default")))
 bool cdbus_add_dict_entry_uint32(DBusMessageIter * dict_iter_ptr, const char * key, dbus_uint32_t value)
 {
   DBusMessageIter dict_entry_iter;
@@ -352,6 +365,7 @@ bool cdbus_add_dict_entry_uint32(DBusMessageIter * dict_iter_ptr, const char * k
   return true;
 }
 
+__attribute__((visibility("default")))
 bool cdbus_add_dict_entry_bool(DBusMessageIter * dict_iter_ptr, const char * key, dbus_bool_t value)
 {
   DBusMessageIter dict_entry_iter;
@@ -377,6 +391,7 @@ bool cdbus_add_dict_entry_bool(DBusMessageIter * dict_iter_ptr, const char * key
   return true;
 }
 
+__attribute__((visibility("default")))
 DBusMessage *
 cdbus_call_raw(
   unsigned int timeout,
@@ -464,6 +479,7 @@ fail:
   return NULL;
 }
 
+__attribute__((visibility("default")))
 DBusMessage *
 cdbus_new_method_call_message(
   const char * service,
@@ -483,6 +499,7 @@ cdbus_new_method_call_message(
   return msg_ptr;
 }
 
+__attribute__((visibility("default")))
 bool
 cdbus_call(
   unsigned int timeout,
@@ -608,6 +625,7 @@ static void cdbus_async_call_reply_context_free(void * user_data)
 
 #undef ctx_ptr
 
+__attribute__((visibility("default")))
 bool
 cdbus_call_async(
   DBusMessage * request_ptr,
@@ -682,6 +700,7 @@ static const char * cdbus_compose_name_owner_match(const char * service)
   return rule;
 }
 
+__attribute__((visibility("default")))
 bool
 cdbus_register_object_signal_handler(
   DBusConnection * connection,
@@ -710,6 +729,7 @@ cdbus_register_object_signal_handler(
   return true;
 }
 
+__attribute__((visibility("default")))
 bool
 cdbus_unregister_object_signal_handler(
   DBusConnection * connection,
@@ -948,6 +968,7 @@ cdbus_free_service_descriptor_if_empty(
   free(service_ptr);
 }
 
+__attribute__((visibility("default")))
 bool
 cdbus_register_object_signal_hooks(
   DBusConnection * connection,
@@ -1049,6 +1070,7 @@ fail:
   return false;
 }
 
+__attribute__((visibility("default")))
 void
 cdbus_unregister_object_signal_hooks(
   DBusConnection * connection,
@@ -1105,6 +1127,7 @@ cdbus_unregister_object_signal_hooks(
   cdbus_free_service_descriptor_if_empty(service_ptr);
 }
 
+__attribute__((visibility("default")))
 bool
 cdbus_register_service_lifetime_hook(
   DBusConnection * connection,
@@ -1154,6 +1177,7 @@ fail:
   return false;
 }
 
+__attribute__((visibility("default")))
 void
 cdbus_unregister_service_lifetime_hook(
   DBusConnection * connection,

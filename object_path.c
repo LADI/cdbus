@@ -226,6 +226,7 @@ CDBUS_INTERFACE_BEGIN(cdbus_g_dbus_interface_dtor_introspectable, "org.freedeskt
   CDBUS_INTERFACE_EXPOSE_METHODS
 CDBUS_INTERFACE_END
 
+__attribute__((visibility("default")))
 cdbus_object_path cdbus_object_path_new(const char *name, const struct cdbus_interface_descriptor * iface1_ptr, ...)
 {
   struct cdbus_object_path * opath_ptr;
@@ -312,6 +313,7 @@ fail:
 
 #define opath_ptr ((struct cdbus_object_path *)data)
 
+__attribute__((visibility("default")))
 void cdbus_object_path_unregister(DBusConnection * connection_ptr, cdbus_object_path data)
 {
   CDBUS_ASSERT(opath_ptr->registered);
@@ -322,6 +324,7 @@ void cdbus_object_path_unregister(DBusConnection * connection_ptr, cdbus_object_
   }
 }
 
+__attribute__((visibility("default")))
 void cdbus_object_path_destroy(DBusConnection * connection_ptr, cdbus_object_path data)
 {
   cdbus_log_debug("Destroying object path");
@@ -417,6 +420,7 @@ static void cdbus_object_path_handler_unregister(DBusConnection * UNUSED(connect
   cdbus_log_debug("Message handler of object path %s was unregistered", (opath_ptr && opath_ptr->name) ? opath_ptr->name : "<unknown>");
 }
 
+__attribute__((visibility("default")))
 bool cdbus_object_path_register(DBusConnection * connection_ptr, cdbus_object_path data)
 {
   cdbus_log_debug("Registering object path \"%s\"", opath_ptr->name);

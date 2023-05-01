@@ -37,6 +37,7 @@
  * object exists in the method array. Return true if the method was found,
  * false otherwise.
  */
+__attribute__((visibility("default")))
 bool cdbus_interface_default_handler(const struct cdbus_interface_descriptor * iface_ptr, struct cdbus_method_call * call_ptr)
 {
   const struct cdbus_method_descriptor * method_ptr;
