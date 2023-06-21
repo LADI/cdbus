@@ -1,0 +1,6 @@
+/** @mainpage cdbus - libdbus helper library
+ *
+ * This library complements the API provided by
+ * https://www.freedesktop.org/wiki/Software/dbus/
+ * so to ease libdbus interfacing in plain C code.
+ */

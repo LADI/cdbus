@@ -25,3 +25,8 @@ README.html:
 AUTHORS.regenerate:
 	git shortlog -sn -- wscript . | sed -E 's@^\s+\S+\s+(.+)@\1@' > AUTHORS
 	cat AUTHORS.tail >> AUTHORS
+
+doxdoc:
+	mkdir -vp build
+	doxygen doc/Doxyfile
+	cp doc/doxygen-awesome-css/doxygen-awesome-darkmode-toggle.js build/doxout/html/
