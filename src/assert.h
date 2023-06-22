@@ -27,7 +27,7 @@
 #ifndef CDBUS_ASSERT_H__F236CB4F_D812_4636_958C_C82FD3781EC8__INCLUDED
 #define CDBUS_ASSERT_H__F236CB4F_D812_4636_958C_C82FD3781EC8__INCLUDED
 
-#include "log.h"
+#include <cdbus/log.h>
 
 #include <assert.h>
 

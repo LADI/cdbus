@@ -27,10 +27,10 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "cdbus.h"
+#include <cdbus/cdbus.h>
 
 #include <string.h>
-#include "log.h"
+#include <cdbus/log.h>
 
 /*
  * Execute a method's function if the method specified in the method call

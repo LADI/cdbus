@@ -179,29 +179,29 @@ def build(bld):
 
     bld(rule=git_ver, target='version.h', update_outputs=True, always=True, ext_out=['.h'])
 
-    libcdbus = bld.shlib(source = [], features = 'c cshlib', includes = [bld.path.get_bld()])
+    libcdbus = bld.shlib(source = [], features = 'c cshlib', includes = [bld.path.get_bld(), "./include/cdbus-1"])
     libcdbus.uselib = 'DBUS-1'
     libcdbus.target = 'cdbus'
     libcdbus.vnum = "1.0.0"
     libcdbus.defines = ['LOG_OUTPUT_STDOUT']
 
     libcdbus.source = [
-        'signal.c',
-        'method.c',
-        'object_path.c',
-        'interface.c',
-        'helpers.c',
-        'log.c',
+        'src/signal.c',
+        'src/method.c',
+        'src/object_path.c',
+        'src/interface.c',
+        'src/helpers.c',
+        'src/log.c',
     ]
 
     bld.install_files('${PREFIX}/include/cdbus-1/cdbus', [
         'version.h',
-        'signal.h',
-        'method.h',
-        'object_path.h',
-        'interface.h',
-        'cdbus.h',
-        'log.h',
+        'include/cdbus-1/cdbus/signal.h',
+        'include/cdbus-1/cdbus/method.h',
+        'include/cdbus-1/cdbus/object_path.h',
+        'include/cdbus-1/cdbus/interface.h',
+        'include/cdbus-1/cdbus/cdbus.h',
+        'include/cdbus-1/cdbus/log.h',
     ])
 
     # process cdbus-1.pc.in -> cdbus-1.pc
@@ -218,7 +218,7 @@ def build(bld):
     bld.install_files('${DOCDIR}', [
         "NEWS.adoc",
         "README.adoc",
-        "gpl2.txt",
+        "doc/gpl2.txt",
         "AUTHORS",
     ])
 

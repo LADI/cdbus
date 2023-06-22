@@ -26,7 +26,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "log.h"
+#include <cdbus/log.h>
 
 cdbus_log_function cdbus_log;
 
