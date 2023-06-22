@@ -27,11 +27,11 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cdbus/cdbus.h>
+#include "cdbus/cdbus.h"
 
 #include <stdlib.h>             /* malloc() and others */
 #include <string.h>             /* strcmp() */
-#include <cdbus/log.h>
+#include "cdbus/log.h"
 #include "assert.h"
 
 /* TODO: move to dedicated header */

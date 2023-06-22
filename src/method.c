@@ -27,10 +27,10 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cdbus/cdbus.h>
+#include "cdbus/cdbus.h"
 
 #include <stdio.h>
-#include <cdbus/log.h>
+#include "cdbus/log.h"
 
 __attribute__((visibility("default")))
 void cdbus_error(struct cdbus_method_call * call_ptr, const char * err_name, const char * format, ...)
