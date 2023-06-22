@@ -919,7 +919,7 @@ WARN_LOGFILE           =
 
 INPUT                  = \
 	doc/mainpage.dox \
-	include/ \
+	include/cdbus-1/cdbus/ \
 	src/
 
 # This tag can be used to specify the character encoding of the source files
