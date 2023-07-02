@@ -1,0 +1,98 @@
+#!/usr/bin/env lua
+-- cdbus-codegen - generate cdbus bindings from dbus xml files
+-- SPDX-FileCopyrightText: Copyright © 2023 Nedko Arnaudov
+-- SPDX-License-Identifier: GPL-3
+
+local lxp = require('lxp')
+local table = require('table')
+
+interfaces = {}
+
+local interface
+local callable
+
+cdbus_codegen = {}
+
+cdbus_codegen.StartElement = function (parser, name, attr)
+  if (name == "interface") then
+    interface = {}
+    interface.name = attr['name']
+--    interface.attr = attr
+--    for k, v in pairs(attr) do print("  ", k, v1) end
+  end
+  if (name == "method") then
+    callable = {}
+    callable.typestr = name
+    callable.name = attr['name']:gsub("%s+", "")
+    --print("method", interface.name, callable.name)
+    --for k, v in pairs(attr) do print("  ", k, v1) end
+  end
+  if (name == "signal") then
+    callable = {}
+    callable.typestr = name
+    callable.name = attr['name']
+    --print("signal", interface.name, signal.name)
+  end
+  if (name == "arg") then
+    arg = {}
+    if attr.name then arg.name = attr.name end
+    arg.type = attr.type
+    arg.direction = attr.direction
+    --print("   arg", arg.name, arg.type, arg.direction)
+    callable.args = callable.args or {}
+    callable.args[#callable.args + 1] = arg
+  end
+end
+
+cdbus_codegen.EndElement = function (parser, name)
+  if (name == "interface") then
+    interfaces[interface.name] = interface
+    interface = nil
+  end
+  if (name == "method") then
+    interface.methods = interface.methods or {}
+    interface.methods[#interface.methods + 1] = callable
+    interface.callables = interface.callables or {}
+    interface.callables[#interface.callables + 1] = callable
+    callable = nil
+  end
+  if (name == "signal") then
+    interface.signals = interface.signals or {}
+    interface.signals[#interface.signals + 1] = callable
+    interface.callables = interface.callables or {}
+    interface.callables[#interface.callables + 1] = callable
+    callable = nil
+  end
+end
+
+p = lxp.new(cdbus_codegen)
+
+for l in io.lines() do  -- iterate lines
+    p:parse(l)          -- parses the line
+--    p:parse("\n")       -- parses the end of line
+end
+p:parse()               -- finishes the document
+p:close()               -- closes the parser
+
+for name, iface in pairs(interfaces) do
+  print(("interface: \"%s\""):format(name))
+  for _, callable in pairs(iface.callables) do
+    local rettype = nil
+    local argtokens = {}
+    if callable.args then
+      for _, arg in ipairs(callable.args) do
+        if not arg.name and arg.direction == "out" then
+          rettype = arg.type
+        else
+          argtokens[#argtokens + 1] = ("%s %s %s"):format(arg.name, arg.type, arg.direction)
+        end
+      end
+    end
+    io.write(("%s %s(%s)"):format(callable.typestr, callable.name, table.concat(argtokens, ", ")))
+    if rettype then
+      print(" = " .. rettype)
+    else
+      print()
+    end
+  end
+end
