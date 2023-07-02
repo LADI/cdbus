@@ -33,6 +33,7 @@ cdbus_codegen.StartElement = function (parser, name, attr)
     callable.name = attr['name']
     --print("signal", interface.name, signal.name)
   end
+  local arg
   if (name == "arg") then
     arg = {}
     if attr.name then arg.name = attr.name end
@@ -75,7 +76,7 @@ p:parse()               -- finishes the document
 p:close()               -- closes the parser
 
 for name, iface in pairs(interfaces) do
-  print(("interface: \"%s\""):format(name))
+  --print(("interface: \"%s\""):format(name))
   for _, callable in pairs(iface.callables) do
     local rettype
     local argtokens = {}
@@ -90,6 +91,49 @@ for name, iface in pairs(interfaces) do
     end
     if callable.typestr == "method" then rettype = "void" end
     if rettype then rettype = " => " .. rettype else rettype = "" end
-    print(("%s %s(%s)%s"):format(callable.typestr, callable.name, table.concat(argtokens, ", "), rettype))
+    --print(("%s %s(%s)%s"):format(callable.typestr, callable.name, table.concat(argtokens, ", "), rettype))
+  end
+end
+
+namespace = tostring(arg[1]) .. "_cdbus_"
+
+for name, iface in pairs(interfaces) do
+  for _, callable in pairs(iface.callables) do
+    local rettype
+    local argtokens = {}
+    local typestr2
+    if callable.typestr == "method" then
+      typestr2 = "METHOD"
+    elseif callable.typestr == "signal" then
+      typestr2 = "SIGNAL"
+    end
+    print(("CDBUS_%s_ARGS_BEGIN(%s, \"\")"):format(typestr2, callable.name))
+    if callable.args then
+      for _, arg in ipairs(callable.args) do
+        if arg.name then
+          local direction2
+          if arg.direction == "in" then
+            direction2 = "IN"
+          elseif arg.direction == "out" then
+            direction2 = "OUT"
+          end
+          print(("  CDBUS_%s_ARG_DESCRIBE_%s(\"%s\", \"%s\", \"\")"): format(typestr2, direction2, arg.name, arg.type))
+        end
+      end
+    end
+    print(("CDBUS_%s_ARGS_END"):format(typestr2))
+    print()
+  end
+
+  local iface_varname = namespace .. "interface_" .. iface.name:gsub("%.", "_")
+  local iface_name_define = namespace:upper() .. "IFACE_" .. iface.name:gsub("%.", "_"):upper()
+
+  print("#define " .. iface_name_define .. " \"" .. iface.name .. "\"")
+  print()
+
+  if #iface.signals == 0 then
+    print(("CDBUS_INTERFACE_DEFAULT_HANDLER_METHODS_ONLY(%s, %s)"):format(iface_varname, iface_name_define))
+  else
+    print(("CDBUS_INTERFACE_DEFAULT_HANDLER_METHODS_AND_SIGNALS(%s, %s)"):format(iface_varname, iface_name_define))
   end
 end
