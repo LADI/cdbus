@@ -77,7 +77,7 @@ p:close()               -- closes the parser
 for name, iface in pairs(interfaces) do
   print(("interface: \"%s\""):format(name))
   for _, callable in pairs(iface.callables) do
-    local rettype = nil
+    local rettype
     local argtokens = {}
     if callable.args then
       for _, arg in ipairs(callable.args) do
@@ -88,11 +88,8 @@ for name, iface in pairs(interfaces) do
         end
       end
     end
-    io.write(("%s %s(%s)"):format(callable.typestr, callable.name, table.concat(argtokens, ", ")))
-    if rettype then
-      print(" = " .. rettype)
-    else
-      print()
-    end
+    if callable.typestr == "method" then rettype = "void" end
+    if rettype then rettype = " => " .. rettype else rettype = "" end
+    print(("%s %s(%s)%s"):format(callable.typestr, callable.name, table.concat(argtokens, ", "), rettype))
   end
 end
