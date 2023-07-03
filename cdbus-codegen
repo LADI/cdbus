@@ -102,6 +102,7 @@ for name, iface in pairs(interfaces) do
     local rettype
     local argtokens = {}
     local typestr2
+    local direction2
     if callable.typestr == "method" then
       typestr2 = "METHOD"
     elseif callable.typestr == "signal" then
@@ -111,13 +112,14 @@ for name, iface in pairs(interfaces) do
     if callable.args then
       for _, arg in ipairs(callable.args) do
         if arg.name then
-          local direction2
-          if arg.direction == "in" then
-            direction2 = "IN"
-          elseif arg.direction == "out" then
-            direction2 = "OUT"
+          if callable.typestr == "method" then
+            typestr2 = "METHOD"
+            direction2 = "_" .. arg.direction:upper()
+          elseif callable.typestr == "signal" then
+            typestr2 = "SIGNAL"
+            direction2 = ""
           end
-          print(("  CDBUS_%s_ARG_DESCRIBE_%s(\"%s\", \"%s\", \"\")"): format(typestr2, direction2, arg.name, arg.type))
+          print(("  CDBUS_%s_ARG_DESCRIBE%s(\"%s\", \"%s\", \"\")"): format(typestr2, direction2, arg.name, arg.type))
         end
       end
     end
