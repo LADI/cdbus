@@ -133,7 +133,7 @@ for name, iface in pairs(interfaces) do
   print("#define " .. iface_name_define .. " \"" .. iface.name .. "\"")
   print()
 
-  if #iface.signals == 0 then
+  if not iface.signals then
     print(("CDBUS_INTERFACE_DEFAULT_HANDLER_METHODS_ONLY(%s, %s)"):format(iface_varname, iface_name_define))
   else
     print(("CDBUS_INTERFACE_DEFAULT_HANDLER_METHODS_AND_SIGNALS(%s, %s)"):format(iface_varname, iface_name_define))
