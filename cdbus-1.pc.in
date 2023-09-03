@@ -8,3 +8,5 @@ Version: 1.0.0
 Libs: -L${libdir} -lcdbus
 Libs.static:
 Cflags: -I${includedir}/cdbus-1
+
+Requires: dbus-1
