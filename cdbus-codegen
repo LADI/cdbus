@@ -125,6 +125,22 @@ for name, iface in pairs(interfaces) do
     print()
   end
 
+  print("CDBUS_METHODS_BEGIN")
+  for _, method in ipairs(iface.methods) do
+    print("CDBUS_METHOD_DESCRIBE(" .. method.name .. ", " .. namespace .. method.name .. "_dbus)")
+  end
+  print("CDBUS_METHODS_END")
+  print()
+
+  if iface.signals then
+    print("CDBUS_SIGNALS_BEGIN")
+    for _, signal in ipairs(iface.signals) do
+      print("CDBUS_SIGNAL_DESCRIBE(" .. signal.name .. ")")
+    end
+    print("CDBUS_SIGNALS_END")
+  end
+  print()
+
   local iface_varname = namespace .. "interface_" .. iface.name:gsub("%.", "_")
   local iface_name_define = namespace:upper() .. "IFACE_" .. iface.name:gsub("%.", "_"):upper()
 
