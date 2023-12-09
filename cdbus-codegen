@@ -99,8 +99,6 @@ namespace = tostring(arg[1]) .. "_cdbus_"
 
 for name, iface in pairs(interfaces) do
   for _, callable in pairs(iface.callables) do
-    local rettype
-    local argtokens = {}
     local typestr2
     local direction2
     if callable.typestr == "method" then
