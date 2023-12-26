@@ -95,6 +95,10 @@ for name, iface in pairs(interfaces) do
   end
 end
 
+print("/* This data is GENERATED from D-Bus interface description XML")
+print(" * Edit by hand only if you know what you are doing */")
+print()
+
 namespace = tostring(arg[1]) .. "_cdbus_"
 
 for name, iface in pairs(interfaces) do
