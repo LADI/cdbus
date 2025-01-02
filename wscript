@@ -182,7 +182,7 @@ def build(bld):
     libcdbus = bld.shlib(source = [], features = 'c cshlib', includes = [bld.path.get_bld(), "./include/cdbus-1"])
     libcdbus.uselib = 'DBUS-1'
     libcdbus.target = 'cdbus'
-    libcdbus.vnum = "1.0.0"
+    libcdbus.vnum = "1.1.0"
     libcdbus.defines = ['LOG_OUTPUT_STDOUT']
 
     libcdbus.source = [
