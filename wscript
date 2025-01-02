@@ -6,7 +6,7 @@ from __future__ import with_statement
 parallel_debug = False
 
 APPNAME='cdbus'
-VERSION='1.0'
+VERSION='1.1'
 
 # these variables are mandatory ('/' are converted automatically)
 top = '.'
