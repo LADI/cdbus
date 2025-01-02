@@ -1,1 +1,14 @@
-== Initial dev release, April 53 (2023)
+== Initial release, version 1.1, January 2th year 56 (2025)
+
+Changes since initial dev release, April 54 (2023):
+
+ * Bump libcdbus soversion to 1.1.0
+ * Upgrade waf to 2.1.4
+ * Add cdbus-codegen tool
+ * Bulid sources against local headers (symlink)
+ * move files to src, include and doc dirs
+ * doxygen documentation
+ * switch to runtime log callback initialization via cdbus_log_setup()
+ * Add version.h to the (public) API
+ * Make public symbols visible
+ * remove ladish leftover
